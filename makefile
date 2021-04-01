@@ -1,7 +1,6 @@
-all: tudo
-
-tudo:
+all: 
 	-g++ -c ./*/*.h ./*/*.cpp
+	-mkdir .compiled
 	-mv ./*/*.gch ./.compiled/
 	-mv *.o .compiled/
 
@@ -9,5 +8,4 @@ tudo:
 
 clean:
 	-rm -f -r .compiled/*
-
 
