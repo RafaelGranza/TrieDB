@@ -5,7 +5,7 @@ using namespace std;
 
 int main(int argc, char const *argv[])
 {
-    triedb tdb();
+    triedb tdb;
 
 
     //ENTIDADES
