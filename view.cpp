@@ -3,7 +3,7 @@
 
 using namespace std;
 
-triedb tdb("/home/granzolino/TrieDB");
+triedb tdb;
 
 void in_table(string tag);
 void remove(string tag);
