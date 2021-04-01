@@ -5,7 +5,7 @@ using namespace std;
 
 int main(int argc, char const *argv[])
 {
-    triedb tdb("/home/granzolino/TrieDB");
+    triedb tdb();
 
 
     //ENTIDADES
