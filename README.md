@@ -4,7 +4,7 @@ NoSQL Trie Based Data Base that stores entities in json format.
 It keeps the data in some hiden folder **.TrieDB**.
 
 ## Complexity:
-As a Trie-based system, the number of items in the database does not interfere with complexity. 
+As a Trie-based system, the number of items in the database does not interfere with the time complexity. 
 The complexity is always related to the size of the item identifier (**|S|**), usually less than **O(log (n))**.
 * Remove: **O( |S| )**
 * Insert: **O( |S| )**
