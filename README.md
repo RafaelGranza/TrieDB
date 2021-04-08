@@ -5,7 +5,7 @@ It keeps the data in some hiden folder **.TrieDB**.
 
 ## Complexity:
 As a Trie-based system, the number of items in the database does not interfere with the time complexity. 
-The complexity is always related to the size of the item identifier (**|S|**), usually less than **O(log (n))**.
+The complexity is always related to the size of the item identifier (**|S|**), usually less than **O(log (n))** for large data sets.
 * Remove: **O( |S| )**
 * Insert: **O( |S| )**
 * Update: **O( |S| )**
