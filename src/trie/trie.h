@@ -28,8 +28,6 @@ public:
 
     T get(const std::string& key);
 
-    void reload_from_wal();
-
     void flush();
 
     void reset();

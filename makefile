@@ -1,26 +1,25 @@
 CXX = g++
-CXXFLAGS = -O3 -std=c++20 -Wall -Iinclude
+CXXFLAGS = -O3 -std=c++20 -Wall -Iinclude -Isrc
 
-SRC = $(wildcard src/*.cpp)
-OBJ = $(patsubst src/%.cpp,build/%.o,$(SRC))
+SRC = $(shell find src -name '*.cpp')
+
+OBJ = $(SRC:src/%.cpp=build/%.o)
 
 LIB = build/libtriedb.a
-
 CLI = build/triedb-cli
-
-$(CLI): tools/triebd_cli.cpp $(LIB)
-	$(CXX) $(CXXFLAGS) $< -Lbuild -ltriedb -o $@
 
 all: $(LIB) $(CLI)
 
 $(LIB): $(OBJ)
+	mkdir -p build
 	ar rcs $@ $^
 
 build/%.o: src/%.cpp
-	@mkdir -p $(dir $@)
+	mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(CLI): tools/cli.cpp $(LIB)
+	$(CXX) $(CXXFLAGS) $< -Lbuild -ltriedb -o $@
 
 clean:
 	rm -rf build
-
-.PHONY: all clean

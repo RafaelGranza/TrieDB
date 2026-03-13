@@ -8,7 +8,7 @@ namespace triedb {
 
 class DB {
 public:
-    DB(const std::string& path);
+    DB(const std::string& name);
     ~DB();
 
     void put(const std::string& key, const std::string& value);
@@ -18,6 +18,7 @@ public:
 private:
     struct Impl;
     std::unique_ptr<Impl> impl;
+    std::string name;
 };
 
 }
