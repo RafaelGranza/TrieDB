@@ -38,7 +38,13 @@ void Trie<T,MAX_NODES,ALPHABET_SZ>::insert(const std::string& key, const T& valu
 
         idx = trie[idx][k];
     }
+    
+    if(values[idx] != T{}){
+        sz -= values[idx].size();
+    }
+    
     values[idx] = std::move(value);
+    sz += value.size();
 }
 
 template<class T, uint32_t MAX_NODES, uint32_t ALPHABET_SZ>
@@ -46,8 +52,11 @@ void Trie<T,MAX_NODES,ALPHABET_SZ>::update(const std::string& key, const T& valu
 
     auto idx = get_index(key);
 
-    if(idx != -1)
+    if(idx != -1){
+        sz -= values[idx].size();
         values[idx] = std::move(value);
+        sz += values[idx].size();
+    }
 }
 
 template<class T, uint32_t MAX_NODES, uint32_t ALPHABET_SZ>
@@ -108,10 +117,11 @@ void Trie<T, MAX_NODES, ALPHABET_SZ>::reset()
         values[i] = T{};
 
     nodes_size = 0;
+    sz = 0;
 }
 
 template <class T, uint32_t MAX_NODES, uint32_t ALPHABET_SZ>
 inline uint64_t Trie<T, MAX_NODES, ALPHABET_SZ>::size()
 {
-    return this->nodes_size;
+    return this->sz;
 }
