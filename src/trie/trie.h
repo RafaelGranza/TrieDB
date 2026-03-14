@@ -2,6 +2,7 @@
 
 #include <string>
 #include <cstdint>
+#include <map>
 
 template<class T, uint32_t MAX_NODES = 1<<16, uint32_t ALPHABET_SZ = 1<<8>
 class Trie {
@@ -10,7 +11,6 @@ class Trie {
     T values[MAX_NODES];
 
     uint32_t nodes_size;
-    uint64_t size;
 
     int64_t get_index(const std::string& key);
 
@@ -28,9 +28,11 @@ public:
 
     T get(const std::string& key);
 
-    void flush();
+    std::map<std::string, T> flush();
 
     void reset();
+
+    uint64_t size();
 };
 
 #include "trie.inl"

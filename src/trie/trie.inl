@@ -1,6 +1,7 @@
 #include <cstring>
 #include <cstdint>
 #include <string>
+#include "trie.h"
 
 template<class T, uint32_t MAX_NODES, uint32_t ALPHABET_SZ>
 int64_t Trie<T,MAX_NODES,ALPHABET_SZ>::get_index(const std::string& key){
@@ -37,7 +38,6 @@ void Trie<T,MAX_NODES,ALPHABET_SZ>::insert(const std::string& key, const T& valu
 
         idx = trie[idx][k];
     }
-
     values[idx] = std::move(value);
 }
 
@@ -76,8 +76,31 @@ T Trie<T,MAX_NODES,ALPHABET_SZ>::get(const std::string& key){
     return values[idx];
 }
 
-template<class T, uint32_t MAX_NODES, uint32_t ALPHABET_SZ>
-void Trie<T,MAX_NODES,ALPHABET_SZ>::reset(){
+template <class T, uint32_t MAX_NODES, uint32_t ALPHABET_SZ>
+inline std::map<std::string, T> Trie<T, MAX_NODES, ALPHABET_SZ>::flush()
+{
+    std::string key = "";
+    std::map<std::string, T> result;
+    auto dfs = [&](auto&& self, uint32_t idx) -> void {
+        if(values[idx] != T{}) result[key] = values[idx];
+        for(int c = 0; c < ALPHABET_SZ; c++){
+            auto next = trie[idx][c];
+            if(next != 0){
+                key.push_back(static_cast<char>(c));
+                self(self, next);
+                key.pop_back();
+            }
+        }
+    };
+
+    dfs(dfs, 0);
+    return result;
+}
+
+
+template <class T, uint32_t MAX_NODES, uint32_t ALPHABET_SZ>
+void Trie<T, MAX_NODES, ALPHABET_SZ>::reset()
+{
 
     std::memset(trie, 0, sizeof(trie));
 
@@ -85,5 +108,10 @@ void Trie<T,MAX_NODES,ALPHABET_SZ>::reset(){
         values[i] = T{};
 
     nodes_size = 0;
-    size = 0;
+}
+
+template <class T, uint32_t MAX_NODES, uint32_t ALPHABET_SZ>
+inline uint64_t Trie<T, MAX_NODES, ALPHABET_SZ>::size()
+{
+    return this->nodes_size;
 }

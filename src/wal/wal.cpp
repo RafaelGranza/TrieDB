@@ -1,4 +1,5 @@
 #include "wal.h"
+#include "utils.cpp"
 #include <sstream>
 #include <iostream>
 #include <filesystem>
@@ -19,19 +20,12 @@ void WAL::open() {
     }
 }
 
-std::string WAL::build_path(const std::string& path){
-    std::filesystem::path storage_dir = "storage";
-    std::filesystem::path name_dir = path;
-    std::filesystem::path file_path = storage_dir / name_dir / "wal";
-    return file_path.string();
-}
-
 WAL::WAL(const std::string& path) : path(path) {
     open();
 }
 
 void WAL::operator()(const std::string& p) {
-    path = build_path(p);
+    path = build_path(p, "wal");
     open();
 }
 
@@ -79,4 +73,14 @@ void WAL::append(OP op, const std::string& key, const std::string& value) {
         wal << 'R' << ' ' << key << '\n';
     }
     wal.flush();
+}
+
+void WAL::reset() {
+    if (!wal.is_open())
+        open();
+
+    wal.close();
+    wal.open(path, std::ios::out | std::ios::trunc);
+    wal.close();
+    wal.open(path, std::ios::in | std::ios::out | std::ios::app);
 }
