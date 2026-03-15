@@ -40,11 +40,11 @@ void Trie<T,MAX_NODES,ALPHABET_SZ>::insert(const std::string& key, const T& valu
     }
     
     if(values[idx] != T{}){
-        sz -= values[idx].size();
+        sz -= key.size() + values[idx].size();
     }
     
     values[idx] = std::move(value);
-    sz += value.size();
+    sz += key.size() + value.size();
 }
 
 template<class T, uint32_t MAX_NODES, uint32_t ALPHABET_SZ>
@@ -64,8 +64,10 @@ void Trie<T,MAX_NODES,ALPHABET_SZ>::remove(const std::string& key){
 
     auto idx = get_index(key);
 
-    if(idx != -1)
+    if(idx != -1){
+        sz -= values[idx].size(); // dont remove key, since the nodes are not deleted.
         values[idx] = T{};
+    }
 }
 
 template<class T, uint32_t MAX_NODES, uint32_t ALPHABET_SZ>
