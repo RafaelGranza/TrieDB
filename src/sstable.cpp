@@ -15,23 +15,18 @@ class SSTable {
     }
 
 public:
-    SSTable(uint32_t level) : level(level) {
-        table_name = generate_name();
-        filepath = build_path(db_name, table_name + ".sst");
-    }
-
-    explicit SSTable(const std::string& path) : level(0) {
+    explicit SSTable(const std::string& db_name, const std::string& path) : db_name(db_name), level(0) {
         table_name = path;
         filepath = build_path(db_name, table_name + ".sst");
     }
 
-    SSTable(const SSTable& sst1, const SSTable& sst2) : level(std::max(sst1.level, sst2.level) + 1) {
+    SSTable(const SSTable& sst1, const SSTable& sst2) : db_name(sst1.db_name), level(std::max(sst1.level, sst2.level) + 1) {
         table_name = generate_name();
         filepath = build_path(db_name, table_name + ".sst");
         merge(sst1, sst2);
     }
 
-    SSTable(const std::map<std::string, std::string>& data) : level(0) {
+    SSTable(const std::string& db_name, const std::map<std::string, std::string>& data) : db_name(db_name), level(0) {
         table_name = generate_name();
         filepath = build_path(db_name, table_name + ".sst");
 
@@ -40,7 +35,6 @@ public:
 
     void write_to_file(const std::map<std::string, std::string>& data) {
         std::ofstream out(filepath);
-        std::cout << "building sst file:" << filepath << std::endl;
         for (const auto& pair : data) {
             out << pair.first << " " << pair.second << "\n";
         }
@@ -80,6 +74,10 @@ public:
         return table_name;
     }
 
+    void remove() {
+        std::filesystem::remove(filepath);
+    }
+
 private:
     void merge(const SSTable& sst1, const SSTable& sst2) {
     }
@@ -97,7 +95,7 @@ static std::map<std::string, SSTable> load_sstables(const std::string& name){
     for (const auto& entry : std::filesystem::directory_iterator(dir)) {
         if (entry.is_regular_file() && entry.path().extension() == ".sst") {
             std::string table_name = entry.path().stem().string();
-            res.emplace(table_name, table_name);
+            res.emplace(table_name, SSTable(name, table_name));
         }
     }
     return res;

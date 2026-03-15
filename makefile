@@ -1,14 +1,17 @@
 CXX = g++
-CXXFLAGS = -O3 -std=c++20 -Wall -Iinclude -Isrc
+CXXFLAGS = -O3 -std=c++20 -Wall -Iinclude -Isrc -MMD -MP
 
 SRC = $(shell find src -name '*.cpp')
-
 OBJ = $(SRC:src/%.cpp=build/%.o)
+DEPS = $(OBJ:.o=.d)
 
 LIB = build/libtriedb.a
 CLI = build/triedb-cli
+BEN = build/benchmark
 
-all: $(LIB) $(CLI)
+all: $(LIB) $(CLI) $(BEN)
+
+-include $(DEPS)
 
 $(LIB): $(OBJ)
 	mkdir -p build
@@ -19,6 +22,9 @@ build/%.o: src/%.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(CLI): tools/cli.cpp $(LIB)
+	$(CXX) $(CXXFLAGS) $< -Lbuild -ltriedb -o $@
+
+$(BEN): bench/benchmark.cpp $(LIB)
 	$(CXX) $(CXXFLAGS) $< -Lbuild -ltriedb -o $@
 
 clean:

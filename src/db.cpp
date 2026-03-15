@@ -1,5 +1,5 @@
 #include <ranges>
-#include "triedb.h"
+#include "triedb.hpp"
 #include "trie/trie.h"
 #include "wal/wal.h"
 #include "sstable.cpp"
@@ -8,18 +8,18 @@
 
 namespace triedb {
 
-constexpr std::size_t THRESHOLD = 20;
+constexpr std::size_t THRESHOLD = 1 << 24; // 16MB
 
 struct DB::Impl {
     Trie<std::string> memtable;
     WAL wal;
     std::map<std::string, SSTable> sstables;
+    std::string name;
 
     void check_flush(){
         if(memtable.size() >= THRESHOLD) {
-            SSTable sstable(memtable.flush());
+            SSTable sstable(name, memtable.flush());
             sstables.emplace(sstable.name(), std::move(sstable));
-            std::cout << "sstable built" << std::endl;
             memtable.reset();
             wal.reset();
         }
@@ -30,6 +30,7 @@ struct DB::Impl {
 DB::DB(const std::string& name)
     : impl(std::make_unique<Impl>()), name(name)
 {
+    impl->name = name;
     impl->wal(name);
     impl->wal.load_memtable(impl->memtable);
     impl->sstables = load_sstables(name);
@@ -59,6 +60,15 @@ void DB::remove(const std::string& key) {
     impl->check_flush();
     impl->wal.append(OP::REMOVE, key);
     impl->memtable.remove(key);
+}
+
+void DB::drop() {
+    impl->memtable.reset();
+    impl->wal.reset();
+    for(auto& [_, sst]: impl->sstables){
+        sst.remove();
+    }
+    impl->sstables.clear();
 }
 
 }

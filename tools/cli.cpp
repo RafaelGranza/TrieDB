@@ -2,7 +2,7 @@
 #include <string>
 #include <sstream>
 
-#include "triedb.h"
+#include "triedb.hpp"
 
 int main() {
 
