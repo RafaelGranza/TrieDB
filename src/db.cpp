@@ -1,8 +1,14 @@
+#pragma once
+
 #include <ranges>
 #include "triedb.hpp"
 #include "trie/trie.h"
+#include "memtable.cpp"
 #include "wal/wal.h"
 #include "sstable.cpp"
+#include "map.cpp"
+#include "hash_map.cpp"
+#include "persistency_manager.hpp"
 
 
 
@@ -11,24 +17,32 @@ namespace triedb {
 constexpr std::size_t THRESHOLD = 1 << 24; // 16MB
 
 struct DB::Impl {
-    Trie<std::string> memtable;
-    WAL wal;
+    PersistencyManager persistency_manager;
+    Memtable<HashMap> memtable;
+    WAL<HashMap> wal;
     std::map<std::string, SSTable> sstables;
     std::string name;
 
+    Impl(DB& db) : persistency_manager(db) {}
+
+
+    void flush() {
+        SSTable sstable(name, memtable.flush());
+        sstables.emplace(sstable.name(), std::move(sstable));
+        memtable.reset();
+        wal.reset();
+    }
+
     void check_flush(){
         if(memtable.size() >= THRESHOLD) {
-            SSTable sstable(name, memtable.flush());
-            sstables.emplace(sstable.name(), std::move(sstable));
-            memtable.reset();
-            wal.reset();
+            flush();
         }
         return;
     }
 };
 
 DB::DB(const std::string& name)
-    : impl(std::make_unique<Impl>()), name(name)
+    : name(name), impl(std::make_unique<Impl>(*this))
 {
     impl->name = name;
     impl->wal(name);
@@ -69,6 +83,14 @@ void DB::drop() {
         sst.remove();
     }
     impl->sstables.clear();
+}
+
+void DB::flush() {
+    impl->flush();
+}
+
+uint64_t DB::memtable_size() {
+    return impl->memtable.size();
 }
 
 }

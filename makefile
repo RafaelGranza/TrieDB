@@ -1,5 +1,5 @@
-CXX = g++
-CXXFLAGS = -O3 -std=c++20 -Wall -Iinclude -Isrc -MMD -MP
+CXX = g++-14
+CXXFLAGS = -O3 -std=c++23 -Wall -Iinclude -Isrc -MMD -MP
 
 SRC = $(shell find src -name '*.cpp')
 OBJ = $(SRC:src/%.cpp=build/%.o)

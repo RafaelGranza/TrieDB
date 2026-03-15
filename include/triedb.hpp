@@ -15,11 +15,14 @@ public:
     std::string get(const std::string& key);
     void remove(const std::string& key);
     void drop();
-
+    void flush();
+    uint64_t memtable_size();
+    
 private:
+
     struct Impl;
-    std::unique_ptr<Impl> impl;
     std::string name;
+    std::unique_ptr<Impl> impl;
 };
 
 }

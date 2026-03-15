@@ -4,7 +4,8 @@
 #include <iostream>
 #include <filesystem>
 
-void WAL::open() {
+template<typename T>
+void WAL<T>::open() {
     // Ensure the storage directory exists
     std::filesystem::path storage_dir = std::filesystem::path(path).parent_path();
     if (!storage_dir.empty() && !std::filesystem::exists(storage_dir)) {
@@ -20,16 +21,19 @@ void WAL::open() {
     }
 }
 
-WAL::WAL(const std::string& path) : path(path) {
+template<typename T>
+WAL<T>::WAL(const std::string& path) : path(path) {
     open();
 }
 
-void WAL::operator()(const std::string& p) {
+template<typename T>
+void WAL<T>::operator()(const std::string& p) {
     path = build_path(p, "wal");
     open();
 }
 
-void WAL::load_memtable(Trie<std::string>& trie) {
+template<typename T>
+void WAL<T>::load_memtable(Memtable<T>& memtable) {
     if(!wal.is_open())
         open();
 
@@ -49,18 +53,19 @@ void WAL::load_memtable(Trie<std::string>& trie) {
             std::getline(iss, value);
             if(!value.empty() && value[0] == ' ') // strip leading space
                 value.erase(0,1);
-            trie.insert(key, value);
+            memtable.insert(key, value);
         } else if(code == 'R') {
             std::string key;
             iss >> key;
-            trie.remove(key);
+            memtable.remove(key);
         }
     }
     // clear eof flag so subsequent writes/read work
     wal.clear();
 }
 
-void WAL::append(OP op, const std::string& key, const std::string& value) {
+template<typename T>
+void WAL<T>::append(OP op, const std::string& key, const std::string& value) {
     if(!wal.is_open())
         open();
 
@@ -75,7 +80,8 @@ void WAL::append(OP op, const std::string& key, const std::string& value) {
     wal.flush();
 }
 
-void WAL::reset() {
+template<typename T>
+void WAL<T>::reset() {
     if (!wal.is_open())
         open();
 
