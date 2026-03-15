@@ -11,7 +11,7 @@
 
 namespace csv {
 
-const std::string VERSION = "v1";
+const std::string VERSION = "v2_hashmap_threaded";
 
 std::string get_current_date() {
     std::time_t t = std::time(nullptr);
@@ -40,7 +40,7 @@ bool file_needs_header(const std::string& filename) {
 }
 
 void write_header(std::ofstream& out) {
-    out << "operation_type,num_ops,key_size,value_size,50th_percentile,90th_percentile,99th_percentile,99.9th_percentile,99.99th_percentile,slowest,average,total\n";
+    out << "operation_type,num_ops,key_size,value_size,50th_percentile,90th_percentile,99th_percentile,99.9th_percentile,99.99th_percentile, 99.999th_percentile,slowest,average,total\n";
 }
 
 void write_result_fields(std::ofstream& out, const Histogram<double>& hist, const Workload& wl) {
@@ -56,6 +56,7 @@ void write_result_fields(std::ofstream& out, const Histogram<double>& hist, cons
     write_field(hist.percentile(0.99));
     write_field(hist.percentile(0.999));
     write_field(hist.percentile(0.9999));
+    write_field(hist.percentile(0.99999));
     write_field(hist.hist.empty() ? 0 : *hist.hist.rbegin());
     write_field(hist.hist.empty() ? 0 : std::accumulate(hist.hist.begin(), hist.hist.end(), 0.0) / hist.hist.size());
     out << std::accumulate(hist.hist.begin(), hist.hist.end(), 0.0) << "\n";

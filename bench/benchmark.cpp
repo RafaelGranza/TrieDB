@@ -88,8 +88,6 @@ int main(int argc, char* argv[]) {
         run_op(wl, key, value);
     }
 
-    std::cout << "Warmup completed, starting benchmark...\n";
-
     std::cout << "Running " << wl.num_ops << " operations...\n";
 
     for (uint64_t i = 0; i < wl.num_ops; i++) {
