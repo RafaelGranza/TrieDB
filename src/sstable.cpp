@@ -1,12 +1,16 @@
 #include <string>
+#include <cstring>
 #include <fstream>
 #include <map>
 #include <filesystem>
 #include "utils.cpp"
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 class SSTable {
     std::string table_name;
-    std::string db_name = "data";
+    std::string db_name;
     std::string filepath;
     uint32_t level;
 
@@ -34,10 +38,34 @@ public:
     }
 
     void write_to_file(const std::map<std::string, std::string>& data) {
-        std::ofstream out(filepath);
-        for (const auto& pair : data) {
-            out << pair.first << " " << pair.second << "\n";
+        size_t total_size = 0;
+        // size can be computed beforhand: data.size() + sizeof(uint32_t) * 2 *data.node_size() + footer/index size
+        for (const auto& [k, v] : data) {
+            total_size += sizeof(uint32_t) * 2 + k.size() + v.size();
         }
+        // Adicione aqui o espaço para o seu Footer/Index depois
+
+        int fd = open(filepath.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0644);
+        ftruncate(fd, total_size);
+
+        void* map = mmap(nullptr, total_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        char* ptr = static_cast<char*>(map);
+
+        // 4. Escrita Direta (Zero-Copy para o App)
+        for (const auto& [key, value] : data) {
+            uint32_t k_size = key.size();
+            uint32_t v_size = value.size();
+
+            std::memcpy(ptr, &k_size, 4); ptr += 4;
+            std::memcpy(ptr, key.data(), k_size); ptr += k_size;
+            std::memcpy(ptr, &v_size, 4); ptr += 4;
+            std::memcpy(ptr, value.data(), v_size); ptr += v_size;
+        }
+
+        // 5. Cleanup
+        msync(map, total_size, MS_SYNC); // Opcional: Avisar o kernel para começar o flush
+        munmap(map, total_size);
+        close(fd);
     }
 
     bool count(const std::string& key) {
