@@ -7,8 +7,12 @@
 template<typename T>
 concept IsMemtableContainer = requires(T v, const std::string& k, const std::string& val) {
     { v.insert(k, val) };
+    { v.update(k, val) };
+    { v.remove(k) };
+    { v.count(k) } -> std::same_as<bool>;
     { v.get(k) } -> std::same_as<std::string>;
     { v.flush() } -> std::same_as<std::map<std::string, std::string>>;
+    { v.reset() };
     { v.size() } -> std::same_as<uint64_t>;
 };
 
