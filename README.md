@@ -29,7 +29,7 @@ The project is designed as a **modular storage engine**, allowing experimentatio
 
 The following diagram shows how the components interact.
 
-![Entities Usage Flow](assets/HashDb-Architecture.png)
+![Entities Usage Flow](assets/HashDB-Architecture.png)
 
 The system follows a classic **LSM-tree pipeline**:
 
